@@ -12,13 +12,17 @@ from pymongo import MongoClient
 from models import OperationModel
 
 
+def get_mongo_client(settings):
+    return MongoClient(settings.host, settings.port)
+
+
 class Database:
 
     def __init__(self, settings):
         self.settings = settings
 
     async def open(self):
-        self.client = MongoClient(self.settings.host, self.settings.port)
+        self.client = get_mongo_client(self.settings)
         self.db = self.client[self.settings.db_name]
         self.history = self.db.history
 
@@ -27,5 +31,5 @@ class Database:
 
     async def add(self, operation: OperationModel):
         await self.open()
-        self.history.insert_one(operation)
+        self.history.insert_one(operation.dict())
         await self.close()
